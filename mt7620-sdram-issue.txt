@@ -1,0 +1,96 @@
+root@OpenWrt:/# cat /etc/config/network 
+
+config interface 'loopback'
+    option ifname 'lo'
+    option proto 'static'
+    option ipaddr '127.0.0.1'
+    option netmask '255.0.0.0'
+
+config globals 'globals'
+    option ula_prefix 'fd0d:95de:768e::/48'
+
+config interface 'lan'
+    option ifname 'eth0.1'
+    option force_link '1'
+    option macaddr '34:bd:f9:7b:fd:10'
+    option type 'bridge'
+    option proto 'static'
+    option ipaddr '192.168.1.1'
+    option netmask '255.255.255.0'
+    option ip6assign '60'
+
+config interface 'wan'
+    option ifname 'eth0.2'
+    option force_link '1'
+    option macaddr '34:bd:f9:7b:fd:11'
+    option proto 'dhcp'
+
+config interface 'wan6'
+    option ifname '@wan'
+    option proto 'dhcpv6'
+
+config switch
+    option name 'switch0'
+    option reset '1'
+    option enable_vlan '1'
+
+config switch_vlan
+    option device 'switch0'
+    option vlan '1'
+    option ports '1 2 3 4 6t'
+
+config switch_vlan
+    option device 'switch0'
+    option vlan '2'
+    option ports '0 6t'
+遇到的问题
+uboot跑完之后，停在Starting kernel...
+
+此时可以在kernel里把setup_early_printk()提前，用early_printk来调试。
+
+prom_soc_init()函数会读取硬件信息，其中
+
+    cfg0 = __raw_readl(sysc + SYSC_REG_SYSTEM_CONFIG0);
+    dram_type = (cfg0 >> SYSCFG0_DRAM_TYPE_SHIFT) & SYSCFG0_DRAM_TYPE_MASK;
+    early_printk("cfg0 0x%x, dram_type %d\n", cfg0, dram_type);
+这里加了一句early_printk打印，发现dram_type值为3：
+
+cfg0 0x132, dram_type 3 
+在代码中：
+
+// mt7620.h
+#define SYSCFG0_DRAM_TYPE_SDRAM     0
+#define SYSCFG0_DRAM_TYPE_DDR1      1
+#define SYSCFG0_DRAM_TYPE_DDR2      2
+
+// mt7620.c
+static __init void
+mt7620_dram_init(struct ralink_soc_info *soc_info)
+{
+    switch (dram_type) {
+    case SYSCFG0_DRAM_TYPE_SDRAM:
+        pr_info("Board has SDRAM\n");
+        soc_info->mem_size_min = MT7620_SDRAM_SIZE_MIN;
+        soc_info->mem_size_max = MT7620_SDRAM_SIZE_MAX;
+        break;
+
+    case SYSCFG0_DRAM_TYPE_DDR1:
+        pr_info("Board has DDR1\n");
+        soc_info->mem_size_min = MT7620_DDR1_SIZE_MIN;
+        soc_info->mem_size_max = MT7620_DDR1_SIZE_MAX;
+        break;
+
+    case SYSCFG0_DRAM_TYPE_DDR2:
+        pr_info("Board has DDR2\n");
+        soc_info->mem_size_min = MT7620_DDR2_SIZE_MIN;
+        soc_info->mem_size_max = MT7620_DDR2_SIZE_MAX;
+        break;
+
+    default:
+        BUG();
+    }
+}
+dram_type=3, 就会走到BUG(). 所以在这里加上case 3。另外，在mt7620_get_dram_rate()取sdram频率的时候，也要加上3这个条件。
+
+mt7620数据手册中只描述了0,1,2的值，也难怪内核代码里会这样写。不知道这里为什么会读出3来。
+
