@@ -1,0 +1,75 @@
+    9  git clone https://github.com/xiaobingyu/ShadowVPN
+   10  cd ShadowVPN/
+   11  ll
+   12  ls
+   13  ls libsodium/
+   14  vi README.md 
+   15  ./configure --enable-static --sysconfdir=/etc
+   16  vi autogen.sh 
+   17  cat debian/README.Debian 
+   18  ls
+   19  ./autogen.sh 
+   20  ls
+   21  ./configure --enable-static --sysconfdir=/etc
+   22  git submodule update --init
+   23  ./autogen.sh 
+   24  ./configure --enable-static --sysconfdir=/etc
+   25  make && make install
+   26  vi /etc/shadowvpn/server.conf 
+   27  cd
+   28  shadowvpn -c /etc/shadowvpn/server.conf -s start
+   29  vi /etc/shadowvpn/server.conf 
+   30  ifconfig
+   31  ifconfig
+   32  shadowvpn -c /etc/shadowvpn/server.conf -s stop
+   33  ifconfig
+   34  ifconfig
+   35  shadowvpn -c /etc/shadowvpn/server.conf -s start
+   36  ifconfig
+   37  wget -O- http://shadowsocks.org/debian/1D27208A.gpg | sudo apt-key add -
+   38  vi /etc/apt/sources.list
+   39  apt-get install shawdowsocks-libev
+   40  apt-get install shadowsocks-libev
+   41  vi /etc/apt/sources.list
+   42  apt-get update
+   43  apt-get install shadowsocks-libev
+   44  git clone https://github.com/xiaobingyu/shadowsocks-libev.git
+   45  cd shadowsocks-libev/
+   46  apt-get install build-essential autoconf libtool libssl-dev gawk debhelper
+   47  dpkg-buildpackage -us -uc
+   48  cd ..
+   49  dpkg -i shadowsocks-libev*.deb
+   50  vi /etc/shadowsocks-libev/config.json 
+   51  vi /etc/shadowsocks-libev/config.json 
+   52  cd shadowsocks-libev
+   53  ls
+   54  ll
+   55  vi INSTALL 
+   56  vi README.md 
+   57  ss-server 
+   58  ss-server -c /etc/shadowsocks-libev/config.json 
+   59  vi /etc/shadowsocks-libev/config.json 
+   60  ss-server -c /etc/shadowsocks-libev/config.json 
+   61  vi /etc/shadowsocks-libev/config.json 
+   62  ifconfig
+   63  vi /etc/shadowsocks-libev/config.json 
+   64  ss-server -c /etc/shadowsocks-libev/config.json 
+   65  vi /etc/shadowsocks-libev/config.json 
+   66  ss-server -c /etc/shadowsocks-libev/config.json 
+   67  vi /etc/init.d/shadowsocks-libev 
+   68  cd
+   69  /etc/init.d/shadowsocks-libev start
+   70  /etc/init.d/shadowsocks-libev stop
+   71  vi /etc/init.d/shadowsocks-libev 
+   72  fg
+   73  /etc/init.d/shadowsocks-libev start
+   74  ps |grep ss-server
+   75  /etc/init.d/shadowsocks-libev stop
+   76  vi /etc/init.d/shadowsocks-libev 
+   77  fg
+   78  /etc/init.d/shadowsocks-libev start
+   79  ps |grep ss-server
+   80  ps
+   81  ps aux|grep ss-server
+   82  ps aux|grep ssserver
+
